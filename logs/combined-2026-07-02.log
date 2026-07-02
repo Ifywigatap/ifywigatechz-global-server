@@ -31,3 +31,28 @@
 2026-07-02 02:58:04 [info]: 🚀 Server running on port 5000
 2026-07-02 02:58:04 [info]: 🌍 Mode: development
 2026-07-02 03:21:49 [info]: 🛑 Received kill signal, shutting down gracefully...
+2026-07-02 04:49:18 [info]: ☁️ Cloudinary configured successfully.
+2026-07-02 04:49:19 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
+2026-07-02 04:49:19 [info]: 🗄️ MongoDB URI: Configured
+2026-07-02 04:49:20 [info]: 🚀 Server running on port 5000
+2026-07-02 04:49:20 [info]: 🌍 Mode: production
+2026-07-02 04:49:50 [error]: Error connecting to MongoDB: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-07-02 04:49:50 [error]: ❌ Failed to connect to DB after starting HTTP server: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-07-02 04:52:03 [info]: 🛑 Received kill signal, shutting down gracefully...
+2026-07-02 04:52:03 [info]: ✅ HTTP server closed.
+2026-07-02 04:52:03 [info]: ✅ MongoDB connection closed.
+2026-07-02 04:52:22 [info]: ☁️ Cloudinary configured successfully.
+2026-07-02 04:52:23 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
+2026-07-02 04:52:23 [info]: 🗄️ MongoDB URI: Configured
+2026-07-02 04:52:23 [info]: 🚀 Server running on port 5000
+2026-07-02 04:52:23 [info]: 🌍 Mode: production
+2026-07-02 04:52:50 [info]: 🛑 Received kill signal, shutting down gracefully...
+2026-07-02 04:52:50 [info]: ✅ HTTP server closed.
+2026-07-02 04:53:13 [info]: ☁️ Cloudinary configured successfully.
+2026-07-02 04:53:14 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
+2026-07-02 04:53:14 [info]: 🗄️ MongoDB URI: Configured
+2026-07-02 04:53:14 [info]: 🚀 Server running on port 5000
+2026-07-02 04:53:14 [info]: 🌍 Mode: production
+2026-07-02 04:53:44 [error]: Error connecting to MongoDB: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-07-02 04:53:44 [error]: ❌ Failed to connect to DB after starting HTTP server: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-07-02 05:01:38 [info]: ::1 - - [02/Jul/2026:04:01:38 +0000] "GET /api/ready HTTP/1.1" 404 40 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.6456"

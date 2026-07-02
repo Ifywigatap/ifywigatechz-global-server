@@ -149,6 +149,18 @@ app.get('/api/health', (req, res) => {
 });
 
 // ===============================
+// ✅ READINESS / LIVENESS
+// ===============================
+// Useful for platforms to verify the app is up and DB status
+app.get('/api/ready', (req, res) => {
+  const readyState = mongoose.connection.readyState; // 0 = disconnected, 1 = connected
+  res.status(200).json({
+    ok: readyState === 1,
+    dbState: readyState,
+  });
+});
+
+// ===============================
 // 🚀 API ROUTES
 // ===============================
 
@@ -200,6 +212,38 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
+  // Start HTTP server first so the platform (Render, Heroku, etc.) can detect a bound port.
+  const server = app.listen(PORT, () => {
+    logger.info(`🚀 Server running on port ${PORT}`);
+    logger.info(`🌍 Mode: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`🆔 PID: ${process.pid}`);
+  });
+
+  // Graceful Shutdown Handler
+  const gracefulShutdown = () => {
+    logger.info('🛑 Received kill signal, shutting down gracefully...');
+    server.close(() => {
+      logger.info('✅ HTTP server closed.');
+      mongoose.connection.close(false).then(() => {
+        logger.info('✅ MongoDB connection closed.');
+        process.exit(0);
+      }).catch(() => process.exit(0));
+    });
+  };
+
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
+
+  // Safely catch unhandled promise rejections
+  process.on('unhandledRejection', (err) => {
+    logger.error(`💥 UNHANDLED REJECTION! Shutting down gracefully... \n${err.stack}`);
+    server.close(() => {
+      process.exit(1);
+    });
+  });
+
+  // Attempt to connect to the database asynchronously. If it fails, keep the server up
+  // so the platform detects the open port; log the error for debugging.
   try {
     await connectDB();
 
@@ -213,37 +257,10 @@ const startServer = async () => {
     cron.schedule('0 * * * *', () => {
       cleanupFeaturedProperties();
     });
-
-    const server = app.listen(PORT, () => {
-      logger.info(`🚀 Server running on port ${PORT}`);
-      logger.info(`🌍 Mode: ${process.env.NODE_ENV || 'development'}`);
-    });
-    
-    // Graceful Shutdown Handler
-    const gracefulShutdown = () => {
-      logger.info('🛑 Received kill signal, shutting down gracefully...');
-      server.close(() => {
-        logger.info('✅ HTTP server closed.');
-        mongoose.connection.close(false).then(() => {
-          logger.info('✅ MongoDB connection closed.');
-          process.exit(0);
-        });
-      });
-    };
-
-    process.on('SIGTERM', gracefulShutdown);
-    process.on('SIGINT', gracefulShutdown);
-
-    // Safely catch unhandled promise rejections
-    process.on('unhandledRejection', (err) => {
-      logger.error(`💥 UNHANDLED REJECTION! Shutting down gracefully... \n${err.stack}`);
-      server.close(() => {
-        process.exit(1);
-      });
-    });
   } catch (error) {
-    logger.error(`❌ Failed to start server: ${error.message}`);
-    process.exit(1);
+    logger.error(`❌ Failed to connect to DB after starting HTTP server: ${error.message}`);
+    // Do not exit here so the platform sees the port bound. If your app requires DB,
+    // consider failing the deploy by exiting or use health checks that verify DB.
   }
 };
 
