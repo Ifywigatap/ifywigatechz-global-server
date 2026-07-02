@@ -24,3 +24,10 @@
 2026-07-02 02:41:50 [info]: ☁️ Cloudinary configured successfully.
 2026-07-02 02:41:51 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
 2026-07-02 02:41:51 [info]: 🗄️ MongoDB URI: Configured
+2026-07-02 02:58:01 [info]: ☁️ Cloudinary configured successfully.
+2026-07-02 02:58:02 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
+2026-07-02 02:58:02 [info]: 🗄️ MongoDB URI: Configured
+2026-07-02 02:58:04 [info]: MongoDB Connected: ac-y9ghqrb-shard-00-01.hnuyqsq.mongodb.net
+2026-07-02 02:58:04 [info]: 🚀 Server running on port 5000
+2026-07-02 02:58:04 [info]: 🌍 Mode: development
+2026-07-02 03:21:49 [info]: 🛑 Received kill signal, shutting down gracefully...
