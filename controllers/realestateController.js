@@ -58,50 +58,68 @@ export const postProperty = asyncHandler(async (req, res) => {
 
 export const updateProperty = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { images: keptImages, newImages, ...updateData } = req.body;
+  // The client now sends a single 'images' array, which can contain
+  // existing image objects and new image base64 strings.
+  const { images: incomingImages, ...updateData } = req.body;
 
   const property = await UserProperty.findById(id);
   if (!property) {
     return res.status(404).json({ ok: false, message: 'Property not found' });
   }
 
-  // Authorization check: Only the owner can update
+  // Authorization check
   if (property.userId.toString() !== req.userId) {
     return res.status(403).json({ ok: false, message: 'Not authorized to update this listing' });
   }
 
-  // 1. Handle Deletions: Identify images removed by the user and destroy them in Cloudinary
-  const keptPublicIds = (keptImages || []).map(img => img.public_id);
-  const imagesToRemove = property.images.filter(img => !keptPublicIds.includes(img.public_id));
+  // --- Refactored Image Handling Logic ---
 
-  if (imagesToRemove.length > 0) {
-    await Promise.all(imagesToRemove.map(img => cloudinary.uploader.destroy(img.public_id)));
-  }
-  
+  const existingPublicIds = new Set(property.images.map(img => img.public_id));
+  const incomingPublicIds = new Set(
+    (incomingImages || [])
+      .filter(img => typeof img === 'object' && img.public_id)
+      .map(img => img.public_id)
+  );
+
+  // 1. Identify images to delete from Cloudinary by diffing the sets
+  const publicIdsToDelete = [...existingPublicIds].filter(publicId => !incomingPublicIds.has(publicId));
+
+  // 2. Identify new base64 images to upload
+  const imagesToUpload = (incomingImages || []).filter(img => typeof img === 'string' && img.startsWith('data:image'));
+
+  // 3. Perform Cloudinary deletions and uploads concurrently
   const propertyFolder = `ifywigatechz/properties/${updateData.propertyType ? updateData.propertyType.toLowerCase().replace(/\s+/g, '-') : 'general'}`;
-  
-  // 2. Handle New Uploads: Upload new Base64 strings to Cloudinary
-  let uploadedImages = [];
-  if (newImages && Array.isArray(newImages)) {
-    uploadedImages = await Promise.all(
-      newImages.map(async (image) => {
-        const result = await cloudinary.uploader.upload(image, {
-          folder: propertyFolder,
-        });
+
+  const [, uploadResults] = await Promise.all([
+    Promise.all(publicIdsToDelete.map(publicId => cloudinary.uploader.destroy(publicId))),
+    Promise.all(imagesToUpload.map(base64Image => 
+      cloudinary.uploader.upload(base64Image, { folder: propertyFolder })
+    ))
+  ]);
+
+  // 4. Construct the final image array for the database
+  let uploadIndex = 0;
+  const finalImages = (incomingImages || [])
+    .map(img => {
+      if (typeof img === 'object' && img.public_id) {
+        return img; // This is an existing image that was kept.
+      }
+      if (typeof img === 'string' && img.startsWith('data:image')) {
+        // This was a new image; replace the base64 with the Cloudinary result.
+        const result = uploadResults[uploadIndex++];
         return { url: result.secure_url, public_id: result.public_id, isPrimary: false };
-      })
-    );
+      }
+      return null; // Ignore malformed entries
+    })
+    .filter(Boolean);
+
+  // Safety check: ensure at least one image is marked as primary.
+  if (finalImages.length > 0 && !finalImages.some(img => img.isPrimary)) {
+    finalImages[0].isPrimary = true;
   }
 
-  // 3. Sync Image Array: Combine kept images and newly uploaded ones
-  property.images = [...(keptImages || []), ...uploadedImages];
-
-  // Safety check: ensure at least one image is marked as primary
-  if (property.images.length > 0 && !property.images.some(img => img.isPrimary)) {
-    property.images[0].isPrimary = true;
-  }
-
-  // 4. Update other fields
+  // 5. Update the property document with the new data and final image array
+  property.images = finalImages;
   Object.assign(property, updateData);
   await property.save();
 

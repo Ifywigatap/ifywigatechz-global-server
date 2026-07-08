@@ -9,7 +9,6 @@ import cron from 'node-cron';
 import helmet from 'helmet';
 import compression from 'compression';
 import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
 
 // 📦 Database
 import connectDB from './config/db.js';
@@ -17,6 +16,7 @@ import mongoose from 'mongoose';
 
 // ⚠️ Error handler
 import { errorHandler } from './middleware/errorHandler.js';
+import { xssSanitizer } from './middleware/xssSanitizer.js';
 
 // ⚡ Rate limiters
 import { 
@@ -73,6 +73,14 @@ process.on('uncaughtException', (err) => {
 const app = express();
 
 // ===============================
+// 🔍 SENTRY REQUEST HANDLERS
+// ===============================
+// The Sentry request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
+
+// ===============================
 // 🌐 PROXY CONFIGURATION
 // ===============================
 // Essential for accurate rate-limiting if hosted behind a reverse proxy (Heroku, Render, Nginx, etc.)
@@ -112,7 +120,7 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 
 // Data sanitization against XSS
-app.use(xss());
+app.use(xssSanitizer);
 
 // Request logging
 // Pipe Morgan HTTP logs directly into our Winston logger
@@ -200,9 +208,10 @@ app.use((req, res) => {
 // ⚠️ ERROR HANDLER
 // ===============================
 
-// The Sentry error handler MUST be placed before your custom error handler
-Sentry.setupExpressErrorHandler(app);
+// The Sentry error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
 
+// Your custom error handler runs after Sentry has captured the error.
 app.use(errorHandler);
 
 // ===============================

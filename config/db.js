@@ -11,8 +11,6 @@ const connectDB = async () => {
     throw new Error(msg);
   }
 
-  mongoose.set('strictQuery', false); // Prepares for strict query standards
-
   const maxAttempts = parseInt(process.env.MONGODB_CONNECT_RETRIES || '6', 10);
   let attempt = 0;
 

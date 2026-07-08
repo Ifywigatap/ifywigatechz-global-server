@@ -3,11 +3,18 @@ import Payment from '../models/Payment.js';
 import Course from '../models/Course.js';
 import Enrollment from '../models/Enrollment.js';
 import UserProperty from '../models/UserProperty.js';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'; // Ensure you have uuid v7+ installed
 import crypto from 'crypto';
-import Paystack from 'paystack';
+import axios from 'axios';
 
-const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY);
+// Create a dedicated axios instance for Paystack API calls
+const paystackApi = axios.create({
+  baseURL: 'https://api.paystack.co',
+  headers: {
+    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+    'Content-Type': 'application/json',
+  },
+});
 
 /**
  * Grants a user access to a specific course.
@@ -101,7 +108,7 @@ export const initializePayment = async (req, res) => {
 
     const reference = `ifyg_${course || metadata?.courseId || metadata?.planId || 'payment'}_${uuidv4().split('-')[0]}`;
 
-    const response = await paystack.transaction.initialize({
+    const response = await paystackApi.post('/transaction/initialize', {
       amount: amount * 100, // kobo
       email,
       reference,
@@ -109,10 +116,10 @@ export const initializePayment = async (req, res) => {
         course,
         userId: req.userId || null, // Pass userId if available from authMiddleware
         ...metadata
-      }
+      },
     });
 
-    res.status(200).json({ ok: true, data: response.data });
+    res.status(200).json({ ok: true, data: response.data.data });
   } catch (error) {
     console.error('[initializePayment] Error:', error);
     res.status(500).json({ ok: false, error: 'Failed to initialize payment.' });
@@ -126,19 +133,20 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Payment reference is required.' });
     }
 
-    const response = await paystack.transaction.verify(reference);
-    const { data } = response;
+    const response = await paystackApi.get(`/transaction/verify/${reference}`);
+    const apiResponse = response.data; // This is the full { status, message, data } object from Paystack
 
-    if (data && data.status === 'success') {
-      const { metadata, customer, amount } = data;
+    // Check for a successful API response AND a successful transaction status
+    if (apiResponse && apiResponse.status && apiResponse.data.status === 'success') {
+      const { metadata, customer, amount } = apiResponse.data;
 
       const result = await fulfillPayment(reference, customer, amount, metadata);
 
       res.status(200).json({ 
         ok: true, 
         message: result.alreadyVerified ? "Payment already verified." : "Payment verified successfully.", 
-        data, 
-        unlocked: metadata?.course || metadata?.courseId 
+        data: apiResponse.data, // Send the inner data object back to the client
+        unlocked: apiResponse.data.metadata?.course || apiResponse.data.metadata?.courseId 
       });
     } else {
       res.status(400).json({ ok: false, error: 'Payment verification failed or payment not successful.' });
