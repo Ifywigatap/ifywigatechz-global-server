@@ -16,7 +16,7 @@ import mongoose from 'mongoose';
 
 // ⚠️ Error handler
 import { errorHandler } from './middleware/errorHandler.js';
-import { xssSanitizer } from './middleware/xssSanitizer.js';
+import xssSanitizer from './middleware/xssSanitizer.js';
 
 // ⚡ Rate limiters
 import { 
@@ -41,7 +41,7 @@ import solutionRoutes from './routes/solutions.js';
 import cartRoutes from './routes/cart.js';
 import wishlistRoutes from './routes/wishlist.js';
 import realestateRoutes from './routes/realestate.js';
-import paymentsRoutes from './routes/payments.js';
+import paymentRoutes from './routes/payments.js'; // Import payment routes
 import chatRoutes from './routes/chat.js';
 
 // 📝 Request logging
@@ -110,6 +110,10 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }));
+
+// We need the raw body for the Paystack webhook, so we use express.raw() for that specific route.
+// All other routes can use express.json(). This must come BEFORE the global express.json().
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 // Body parsing (with security limits)
 app.use(express.json({ limit: '50mb' })); // Increased to support video Data URIs
@@ -182,7 +186,7 @@ app.use('/api/solutions', solutionRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/realestate', realestateRoutes);
-app.use('/api/payments', paymentsRoutes); // ✅ FIXED
+app.use('/api/payments', paymentRoutes); // Use the new payment routes
 app.use('/api/chat', chatRoutes); // Ensure this points to the correct chat routes file
 
 // ===============================

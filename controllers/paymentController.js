@@ -6,6 +6,10 @@ import UserProperty from '../models/UserProperty.js';
 import { v4 as uuidv4 } from 'uuid'; // Ensure you have uuid v7+ installed
 import crypto from 'crypto';
 import axios from 'axios';
+import path from 'path';
+import fs from 'fs';
+import { asyncHandler } from '../middleware/errorHandler.js';
+import logger from '../utils/logger.js';
 
 // Create a dedicated axios instance for Paystack API calls
 const paystackApi = axios.create({
@@ -191,3 +195,48 @@ export const webhookHandler = async (req, res) => {
     console.error('[Webhook] Error:', error);
   }
 };
+
+/**
+ * @desc    Download a purchased digital product
+ * @route   GET /api/payments/download/:productName
+ * @access  Private
+ */
+export const downloadProduct = asyncHandler(async (req, res) => {
+  const { productName } = req.params;
+  const userId = req.userId; // From your auth middleware
+
+  if (!userId) {
+    return res.status(401).json({ ok: false, message: "Authentication required." });
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ ok: false, message: "User not found." });
+  }
+
+  // 1. Check if the user has purchased this product
+  const purchase = user.purchasedProducts?.find(p => p.productName === productName);
+
+  if (!purchase) {
+    return res.status(403).json({ ok: false, message: "You have not purchased this product." });
+  }
+
+  // 2. Construct the file path
+  // IMPORTANT: This folder should NOT be in your public/static directory.
+  const filename = `${productName.replace(/\s+/g, '-')}.pdf`; // Or .zip, etc.
+  const filePath = path.join(process.cwd(), 'private_downloads', filename);
+
+  // 3. Check if the file exists
+  if (!fs.existsSync(filePath)) {
+    logger.error(`File not found for product: ${productName} at path: ${filePath}`);
+    return res.status(404).json({ ok: false, message: "File not found." });
+  }
+
+  // 4. Stream the file to the user for download
+  res.download(filePath, (err) => {
+    if (err) {
+      logger.error(`Error downloading file for user ${userId}: ${err.message}`);
+    }
+  });
+});
