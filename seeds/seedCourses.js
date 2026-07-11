@@ -1681,5 +1681,8 @@ const seedDatabase = async () => {
   }
 };
 
-// Run the seed
-seedDatabase();
+// This check ensures the seed function only runs when the script is executed directly
+// e.g., `node server/seeds/seedCourses.js`
+if (import.meta.url.startsWith('file:') && process.argv[1] === mongoose.path.normalize(import.meta.url.substring(7))) {
+  seedDatabase();
+}
