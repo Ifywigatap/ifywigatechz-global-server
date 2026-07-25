@@ -24,17 +24,3 @@ export const envPath = envPaths.find(fs.existsSync);
 if (envPath) {
   dotenv.config({ path: envPath });
 }
-
-const REQUIRED_ENV = [
-  'MONGODB_URI',
-  'JWT_SECRET',
-  'PAYSTACK_SECRET_KEY',
-  'CLOUDINARY_CLOUD_NAME'
-];
-
-REQUIRED_ENV.forEach((key) => {
-  if (!process.env[key]) {
-    console.error(`❌ Missing critical environment variable: ${key}`);
-    if (process.env.NODE_ENV === 'production') process.exit(1);
-  }
-});

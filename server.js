@@ -1,6 +1,9 @@
 import { envPath } from './config/env.js'; // 👈 MUST be the first import
+import { validateEnvironment } from './config/validateEnv.js';
 import express from 'express';
 import cors from 'cors';
+
+validateEnvironment(); // 👈 Validate environment variables immediately on startup
 import cookieParser from 'cookie-parser';
 import 'express-async-errors';
 import cron from 'node-cron';
@@ -116,8 +119,8 @@ app.use(cors({
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 // Body parsing (with security limits)
-app.use(express.json({ limit: '50mb' })); // Increased to support video Data URIs
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '1mb' })); // Use a reasonable limit for JSON
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
@@ -142,12 +145,6 @@ app.use('/api/auth/login', loginRateLimiter);
 app.use('/api/auth', authRateLimiter);
 app.use('/api/chat', chatRateLimiter);
 app.use('/api/contacts', contactRateLimiter);
-
-// ===============================
-// 🧠 AUDIT LOGGING
-// ===============================
-
-app.use('/api/auth', auditLog);
 
 // ===============================
 // 🧪 HEALTH CHECK
@@ -261,14 +258,27 @@ const startServer = async () => {
     await connectDB();
 
     // 📅 Schedule Database Backup (Runs every day at midnight server-time)
-    cron.schedule('0 0 * * *', () => {
+    cron.schedule('0 0 * * *', async () => {
       logger.info('⏳ Starting scheduled database backup...');
-      backupDatabase();
+      try {
+        // Assuming backupDatabase is async, which is best practice
+        await backupDatabase();
+      } catch (error) {
+        logger.error(`🚨 Error during scheduled database backup: ${error.message}`);
+        Sentry.captureException(error);
+      }
     });
 
     // 🏠 Schedule Featured Property Cleanup (Runs every hour)
-    cron.schedule('0 * * * *', () => {
-      cleanupFeaturedProperties();
+    cron.schedule('0 * * * *', async () => {
+      logger.info('⏳ Starting scheduled featured property cleanup...');
+      try {
+        // Assuming cleanupFeaturedProperties is async
+        await cleanupFeaturedProperties();
+      } catch (error) {
+        logger.error(`🚨 Error during scheduled property cleanup: ${error.message}`);
+        Sentry.captureException(error);
+      }
     });
   } catch (error) {
     logger.error(`❌ Failed to connect to DB after starting HTTP server: ${error.message}`);

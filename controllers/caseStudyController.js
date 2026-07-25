@@ -1,6 +1,7 @@
 import CaseStudy from '../models/CaseStudy.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { getPagination } from '../utils/helpers.js';
+import mongoose from 'mongoose'; // Add mongoose import
 
 // Helper to find case study by numeric ID, MongoDB ObjectId, or Slug
 const findCaseStudy = async (identifier) => {
@@ -13,8 +14,6 @@ const findCaseStudy = async (identifier) => {
   
   return caseStudy;
 };
-
-import mongoose from 'mongoose'; // Add mongoose import
 
 export const createCaseStudy = asyncHandler(async (req, res) => {
   const { title, company, industry, challenge, solution, technologies, results, testimonial, link, status, featured } = req.body;
@@ -69,38 +68,31 @@ export const getAllCaseStudies = asyncHandler(async (req, res) => {
   });
 });
 
-export const getCaseStudyById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const caseStudy = await findCaseStudy(id);
+export const getFeaturedCaseStudies = asyncHandler(async (req, res) => {
+  const caseStudies = await CaseStudy.find({ status: 'published', featured: true })
+    .limit(6)
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    ok: true,
+    data: caseStudies,
+  });
+});
+
+export const getCaseStudy = asyncHandler(async (req, res) => {
+  const { identifier } = req.params;
+  const caseStudy = await findCaseStudy(identifier);
   if (!caseStudy) {
     return res.status(404).json({
       ok: false,
       message: 'Case study not found'
     });
   }
-
   res.status(200).json({
     ok: true,
     data: caseStudy
   });
 });
-
-export const getCaseStudyBySlug = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
-  const caseStudy = await findCaseStudy(slug);
-  if (!caseStudy) {
-    return res.status(404).json({
-      ok: false,
-      message: 'Case study not found'
-    });
-  }
-
-  res.status(200).json({
-    ok: true,
-    data: caseStudy
-  });
-});
-
 export const updateCaseStudy = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { title, company, industry, challenge, solution, technologies, results, testimonial, link, status, featured } = req.body;

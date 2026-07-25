@@ -6,6 +6,20 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { getPagination } from '../utils/helpers.js';
 import mongoose from 'mongoose';
 
+// Helper function to stream a buffer to Cloudinary
+const uploadStream = (buffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (result) {
+        resolve(result);
+      } else {
+        reject(error);
+      }
+    });
+    stream.end(buffer);
+  });
+};
+
 // Helper to redact video URLs if the user is not authorized to see them
 const secureCourseContent = async (course, userId, userRole) => {
   const isEnrolled = userId ? await Enrollment.exists({ user: userId, course: course._id }) : false;
@@ -74,24 +88,32 @@ const findCourse = async (identifier, populateOpts = null) => {
 };
 
 export const createCourse = asyncHandler(async (req, res) => {
-  const { title, description, excerpt, category, level, price, discountPrice, duration, thumbnail, instructor, modules, ...rest } = req.body;
+  // Course data is sent as a stringified JSON field to support multipart/form-data
+  const courseData = JSON.parse(req.body.courseData);
+  const { title, description, excerpt, category, level, price, discountPrice, duration, thumbnail, instructor, modules, ...rest } = courseData;
+  const files = req.files; // Array of video files from multer
+  let fileIndex = 0;
 
-  // Process modules to handle video uploads if they are provided as data URIs (Base64)
-  // This ensures videos are stored as "authenticated" assets on Cloudinary
+  // Process modules to handle video uploads via streaming
   const processedModules = modules ? await Promise.all(modules.map(async (module) => {
     const lessons = await Promise.all((module.lessons || []).map(async (lesson) => {
-      // If a 'video' field (raw data) is present, upload it to Cloudinary
-      if (lesson.video && lesson.video.startsWith('data:video')) {
-        const result = await cloudinary.uploader.upload(lesson.video, {
+      // The client sends a placeholder `video: "UPLOAD"` to indicate a file should be uploaded for this lesson
+      if (lesson.video === 'UPLOAD' && files && files[fileIndex]) {
+        const file = files[fileIndex];
+        fileIndex++;
+
+        // Stream the file buffer to Cloudinary
+        const result = await uploadStream(file.buffer, {
           resource_type: 'video',
-          type: 'authenticated', // 👈 This makes the asset private/authenticated
+          type: 'authenticated',
           folder: `ifywigatechz/courses/${title.toLowerCase().replace(/\s+/g, '-')}/videos`,
         });
         
-        // Store the returned secure URL and remove the raw data
-        return { ...lesson, videoUrl: result.secure_url, video: undefined };
+        // Replace the placeholder with the actual secure URL
+        const { video, ...restOfLesson } = lesson;
+        return { ...restOfLesson, videoUrl: result.secure_url };
       }
-      return lesson;
+      return lesson; // Return lesson as is if no video upload is indicated
     }));
     return { ...module, lessons };
   })) : [];
@@ -110,7 +132,6 @@ export const createCourse = asyncHandler(async (req, res) => {
     instructor: instructor || { name: 'Ify Wigatap', title: 'Tech Instructor', avatar: '/instructors/ify.jpg' },
     modules: processedModules
   });
-
   await course.save();
 
   res.status(201).json({
@@ -309,32 +330,47 @@ export const updateCourse = asyncHandler(async (req, res) => {
     });
   }
 
-  const { modules, ...updateData } = req.body;
-  let processedModules = course.modules; // Start with existing modules
-
-  if (modules) {
-    processedModules = await Promise.all(modules.map(async (module) => {
-      const lessons = await Promise.all((module.lessons || []).map(async (lesson) => {
-        if (lesson.video && lesson.video.startsWith('data:video')) {
-          const result = await cloudinary.uploader.upload(lesson.video, {
-            resource_type: 'video',
-            type: 'authenticated',
-            folder: `ifywigatechz/courses/${course.title.toLowerCase().replace(/\s+/g, '-')}/videos`,
-          });
-          return { ...lesson, videoUrl: result.secure_url, video: undefined };
-        }
-        return lesson;
-      }));
-      return { ...module, lessons };
-    }));
-  }
-
-  // Check authorization - only admins can update (instructor field is now embedded)
+  // Check authorization - only admins can update
   if (req.userRole !== 'admin') {
     return res.status(403).json({
       ok: false,
       message: 'Not authorized to update this course'
     });
+  }
+
+  const courseData = JSON.parse(req.body.courseData);
+  const { modules, ...updateData } = courseData;
+  const files = req.files;
+  let fileIndex = 0;
+
+  let processedModules = course.modules; // Start with existing modules
+
+  if (modules) {
+    processedModules = await Promise.all(modules.map(async (module) => {
+      const lessons = await Promise.all((module.lessons || []).map(async (lesson) => {
+        // If a new video is being uploaded for this lesson
+        if (lesson.video === 'UPLOAD' && files && files[fileIndex]) {
+          const file = files[fileIndex];
+          fileIndex++;
+
+          const result = await uploadStream(file.buffer, {
+            resource_type: 'video',
+            type: 'authenticated',
+            folder: `ifywigatechz/courses/${course.title.toLowerCase().replace(/\s+/g, '-')}/videos`,
+          });
+          
+          // Return a new lesson object with the new videoUrl, removing the placeholder
+          const { video, ...restOfLesson } = lesson;
+          return { ...restOfLesson, videoUrl: result.secure_url };
+        }
+        
+        // If no new video, return the lesson data as sent from the client.
+        // The client is responsible for sending the existing `videoUrl` if it should be kept.
+        const { video, ...restOfLesson } = lesson;
+        return restOfLesson;
+      }));
+      return { ...module, lessons };
+    }));
   }
 
   course = await Course.findByIdAndUpdate(course._id, {
