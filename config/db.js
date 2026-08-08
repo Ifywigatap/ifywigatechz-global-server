@@ -4,11 +4,15 @@ import logger from '../utils/logger.js';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    const msg = 'MONGODB_URI is not set. Please configure the connection string.';
-    logger.error(msg);
-    throw new Error(msg);
+  // Prefer explicit MONGODB_URI (Atlas). If not set, fall back to a local MongoDB
+  // This lets developers run the server locally without Atlas while they
+  // whitelist their IP or configure credentials.
+  const envUri = process.env.MONGODB_URI;
+  const localFallback = 'mongodb://127.0.0.1:27017/ifywigatechz';
+  const uri = envUri || localFallback;
+
+  if (!envUri) {
+    logger.warn('MONGODB_URI not set — using local fallback MongoDB at mongodb://127.0.0.1:27017/ifywigatechz');
   }
 
   const maxAttempts = parseInt(process.env.MONGODB_CONNECT_RETRIES || '6', 10);
@@ -18,9 +22,10 @@ const connectDB = async () => {
     try {
       attempt += 1;
       const conn = await mongoose.connect(uri, {
-        // Mongoose 6+ uses these by default, but setting explicitly for clarity
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+        // Mongoose 6+ uses defaults for parser and topology.
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+        family: 4,
       });
 
       logger.info(`MongoDB Connected: ${conn.connection.host}`);

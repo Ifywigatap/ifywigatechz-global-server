@@ -1,0 +1,68 @@
+2026-08-04 23:18:53 [info]: ☁️ Cloudinary configured successfully.
+2026-08-04 23:18:56 [warn]: ⚠️ Missing optional production environment variables for development: SENTRY_DSN.
+2026-08-04 23:18:56 [info]: ✅ Environment validation completed.
+2026-08-04 23:18:56 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
+2026-08-04 23:18:56 [info]: 🗄️ MongoDB URI: Configured
+2026-08-04 23:18:56 [info]: 🚀 Server running on port 5000
+2026-08-04 23:18:56 [info]: 🌍 Mode: development
+2026-08-04 23:18:56 [info]: 🆔 PID: 13292
+2026-08-04 23:18:56 [error]: (node:13292) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-08-04 23:18:56 [error]: (node:13292) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:19:00 [error]: MongoDB connect attempt 1 failed: queryTxt ESERVFAIL ifywigatechz001.hnuyqsq.mongodb.net
+2026-08-04 23:19:00 [info]: Retrying MongoDB connection in 2000ms (attempt 2/6)
+2026-08-04 23:19:02 [error]: (node:13292) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:19:02 [error]: (node:13292) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:19:32 [error]: MongoDB connect attempt 2 failed: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-08-04 23:19:32 [info]: Retrying MongoDB connection in 4000ms (attempt 3/6)
+2026-08-04 23:19:36 [error]: (node:13292) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:19:36 [error]: (node:13292) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:20:07 [error]: MongoDB connect attempt 3 failed: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-08-04 23:20:07 [info]: Retrying MongoDB connection in 8000ms (attempt 4/6)
+2026-08-04 23:20:15 [error]: (node:13292) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:20:15 [error]: (node:13292) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:20:17 [error]: MongoDB connect attempt 4 failed: querySrv ESERVFAIL _mongodb._tcp.ifywigatechz001.hnuyqsq.mongodb.net
+2026-08-04 23:20:17 [info]: Retrying MongoDB connection in 16000ms (attempt 5/6)
+2026-08-04 23:20:33 [error]: (node:13292) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:20:33 [error]: (node:13292) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:20:36 [error]: MongoDB connect attempt 5 failed: querySrv ESERVFAIL _mongodb._tcp.ifywigatechz001.hnuyqsq.mongodb.net
+2026-08-04 23:20:36 [info]: Retrying MongoDB connection in 30000ms (attempt 6/6)
+2026-08-04 23:21:06 [error]: (node:13292) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:21:06 [error]: (node:13292) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:21:08 [error]: MongoDB connect attempt 6 failed: querySrv ESERVFAIL _mongodb._tcp.ifywigatechz001.hnuyqsq.mongodb.net
+2026-08-04 23:21:08 [error]: Exceeded MongoDB connection attempts. Giving up.
+2026-08-04 23:21:08 [error]: ❌ Failed to connect to DB after starting HTTP server: querySrv ESERVFAIL _mongodb._tcp.ifywigatechz001.hnuyqsq.mongodb.net
+2026-08-04 23:50:08 [info]: ☁️ Cloudinary configured successfully.
+2026-08-04 23:50:09 [warn]: ⚠️ Missing optional production environment variables for development: SENTRY_DSN.
+2026-08-04 23:50:09 [info]: ✅ Environment validation completed.
+2026-08-04 23:50:09 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
+2026-08-04 23:50:09 [info]: 🗄️ MongoDB URI: Configured
+2026-08-04 23:50:09 [info]: 🚀 Server running on port 5000
+2026-08-04 23:50:09 [info]: 🌍 Mode: development
+2026-08-04 23:50:09 [info]: 🆔 PID: 16880
+2026-08-04 23:50:09 [error]: (node:16880) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-08-04 23:50:09 [error]: (node:16880) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:50:40 [error]: MongoDB connect attempt 1 failed: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-08-04 23:50:40 [info]: Retrying MongoDB connection in 2000ms (attempt 2/6)
+2026-08-04 23:50:42 [error]: (node:16880) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:50:42 [error]: (node:16880) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:51:13 [error]: MongoDB connect attempt 2 failed: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-08-04 23:51:13 [info]: Retrying MongoDB connection in 4000ms (attempt 3/6)
+2026-08-04 23:51:17 [error]: (node:16880) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:51:17 [error]: (node:16880) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2026-08-04 23:51:31 [info]: 🛑 Received kill signal, shutting down gracefully...
+2026-08-04 23:57:50 [info]: ☁️ Cloudinary configured successfully.
+2026-08-04 23:57:51 [warn]: ⚠️ Missing optional production environment variables for development: SENTRY_DSN.
+2026-08-04 23:57:51 [info]: ✅ Environment validation completed.
+2026-08-04 23:57:51 [info]: 📄 Loaded ENV: C:\Users\hp\Documents\My  Projects\ifywigatechz-site\server\.env
+2026-08-04 23:57:51 [info]: 🗄️ MongoDB URI: Configured
+2026-08-04 23:57:51 [info]: 🚀 Server running on port 5000
+2026-08-04 23:57:51 [info]: 🌍 Mode: development
+2026-08-04 23:57:51 [info]: 🆔 PID: 11360
+2026-08-04 23:58:04 [error]: MongoDB connect attempt 1 failed: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-08-04 23:58:04 [info]: Retrying MongoDB connection in 2000ms (attempt 2/6)
+2026-08-04 23:58:08 [error]: MongoDB connect attempt 2 failed: queryTxt ESERVFAIL ifywigatechz001.hnuyqsq.mongodb.net
+2026-08-04 23:58:08 [info]: Retrying MongoDB connection in 4000ms (attempt 3/6)
+2026-08-04 23:58:21 [info]: 🛑 Received kill signal, shutting down gracefully...
+2026-08-04 23:58:21 [info]: ✅ HTTP server closed.

@@ -79,9 +79,7 @@ const app = express();
 // 🔍 SENTRY REQUEST HANDLERS
 // ===============================
 // The Sentry request handler must be the first middleware on the app
-app.use(Sentry.Handlers.requestHandler());
-// TracingHandler creates a trace for every incoming request
-app.use(Sentry.Handlers.tracingHandler());
+Sentry.setupExpressErrorHandler(app);
 
 // ===============================
 // 🌐 PROXY CONFIGURATION
@@ -210,7 +208,7 @@ app.use((req, res) => {
 // ===============================
 
 // The Sentry error handler must be before any other error middleware and after all controllers
-app.use(Sentry.Handlers.errorHandler());
+app.use(Sentry.expressErrorHandler());
 
 // Your custom error handler runs after Sentry has captured the error.
 app.use(errorHandler);
