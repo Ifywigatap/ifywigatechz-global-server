@@ -41,6 +41,22 @@ CORS_ORIGIN=http://localhost:5173,http://localhost:3000
 **Note for Production:** Update `CORS_ORIGIN` to your frontend's live domain (e.g., `https://www.ifywigatechz.com`).
 ```
 
+### Render deployment notes
+
+For Render, set these environment variables in the service settings:
+
+- `NODE_ENV=production`
+- `MONGODB_URI=<your Atlas connection string>`
+- `JWT_SECRET=<strong secret>`
+- `JWT_EXPIRE=15m`
+- `CORS_ORIGIN=https://your-frontend-domain.com`
+- `PAYSTACK_SECRET_KEY=<your key>`
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `GROQ_API_KEY`
+- `SENTRY_DSN` (optional, but recommended)
+
+Render will provide `PORT` automatically, so the server uses that value when present.
+
 ## MongoDB Setup
 
 1. Create a MongoDB Atlas account at https://www.mongodb.com/cloud/atlas

@@ -10,15 +10,31 @@ export const validateEnvironment = () => {
     process.env.NODE_ENV = 'development';
   }
 
-  const requiredEnvVars = [
-    'PORT',
-    'MONGODB_URI',
-    'JWT_SECRET',
-    'JWT_EXPIRE',
-    'CORS_ORIGIN',
-  ];
+  const isProduction = process.env.NODE_ENV === 'production';
 
-  const productionRequiredEnvVars = [
+  if (!process.env.PORT) {
+    logger.info('ℹ️ PORT not set. Defaulting to 5000.');
+    process.env.PORT = '5000';
+  }
+
+  if (!process.env.JWT_EXPIRE) {
+    logger.info('ℹ️ JWT_EXPIRE not set. Defaulting to 15m.');
+    process.env.JWT_EXPIRE = '15m';
+  }
+
+  if (!process.env.CORS_ORIGIN) {
+    const frontendOrigin = process.env.VITE_FRONTEND_URL || process.env.FRONTEND_URL;
+    if (frontendOrigin) {
+      process.env.CORS_ORIGIN = frontendOrigin;
+    } else if (!isProduction) {
+      process.env.CORS_ORIGIN = 'http://localhost:5173,http://localhost:3000';
+    } else {
+      logger.warn('⚠️ CORS_ORIGIN not set. Configure it in Render for your frontend domain.');
+    }
+  }
+
+  const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
+  const optionalProductionEnvVars = [
     'PAYSTACK_SECRET_KEY',
     'SENTRY_DSN',
     'CLOUDINARY_CLOUD_NAME',
@@ -27,12 +43,9 @@ export const validateEnvironment = () => {
     'GROQ_API_KEY',
   ];
 
-  const missingRequired = requiredEnvVars.filter(varName => !process.env[varName]);
-  const missingProduction = process.env.NODE_ENV === 'production'
-    ? productionRequiredEnvVars.filter(varName => !process.env[varName])
-    : [];
-  const missingOptional = process.env.NODE_ENV !== 'production'
-    ? productionRequiredEnvVars.filter(varName => !process.env[varName])
+  const missingRequired = requiredEnvVars.filter((varName) => !process.env[varName]);
+  const missingOptional = isProduction
+    ? optionalProductionEnvVars.filter((varName) => !process.env[varName])
     : [];
 
   if (missingRequired.length > 0) {
@@ -41,14 +54,8 @@ export const validateEnvironment = () => {
     process.exit(1);
   }
 
-  if (missingProduction.length > 0) {
-    const errorMessage = `❌ Missing production environment variables: ${missingProduction.join(', ')}. Application cannot start in production.`;
-    logger.error(errorMessage);
-    process.exit(1);
-  }
-
   if (missingOptional.length > 0) {
-    logger.warn(`⚠️ Missing optional production environment variables for development: ${missingOptional.join(', ')}.`);
+    logger.warn(`⚠️ Missing optional production variables: ${missingOptional.join(', ')}.`);
   }
 
   logger.info('✅ Environment validation completed.');
